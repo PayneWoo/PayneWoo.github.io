@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-08-02T15:38:55.907Z</updated>
+  <updated>2018-08-03T08:17:47.246Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Javac</title>
+    <link href="http://yoursite.com/2018/08/03/Javac/"/>
+    <id>http://yoursite.com/2018/08/03/Javac/</id>
+    <published>2018-08-03T08:14:37.171Z</published>
+    <updated>2018-08-03T08:17:47.246Z</updated>
+    
+    <content type="html"><![CDATA[<p><strong>要点：</strong></p><blockquote><p>1、Javac 如何将 Java 的源代码转化为 class 字节码？<br>2、Javac 的语法树结构；<br>3、Javac 的详细工作流程；<br>4、Java 中如何实现内部类？<br>5、Javac 与其他编译器的比较；</p></blockquote><h2 id="1-什么是-Javac"><a href="#1-什么是-Javac" class="headerlink" title="1 什么是 Javac ?"></a><strong>1 什么是 Javac ?</strong></h2><p>Javac 是一种编译器，其作用是将 Java 源程序 编译成符合 JVM 规范的 Java 字节码（即 JVM 可以解释执行的二进制码）</p><h2 id="2-Javac-的基本结构"><a href="#2-Javac-的基本结构" class="headerlink" title="2 Javac 的基本结构"></a><strong>2 Javac 的基本结构</strong></h2><p>Javac 主要的四个模块：</p><p><strong>词法分析器组件：</strong>从源代码中识别出哪些字节是我们定义的语法关键字，如 if、else、for 等等。<br><strong>语法分析器组件：</strong>形成一个符合 JVM 规范的抽象语法树。（抽象语法树是一个结构化的语法表达形式，作用是把语言的主要词法用一个结构化的形式组织在一起）<br><strong>语义分析器组件：</strong>主要作用是将复杂的语法转化成更简单的语法<br><strong>字节码生成器组件：</strong>根据经过注解的抽象语法树生成字节码</p><h2 id="3-Javac-工作原理分析"><a href="#3-Javac-工作原理分析" class="headerlink" title="3 Javac 工作原理分析"></a><strong>3 Javac 工作原理分析</strong></h2><p><strong>词法分析器：</strong><br>这个过程在 JavacParser 的 ParseCompilationUnit 方法中完成的，它的源代码可以通过 OpenJDK 下载来查看。该方法从源文件的第一个字符开始，逐个字符的检查，按照 Java 语法规范依次找出 package、import、类定义、以及属性和方法定义等，将这个类中的所有关键词匹配到Token类的所有项中的任何一项，即将Java源文件的字符流转变为对应的Token流，最后构建一个抽象语法树。</p><p><strong>语法分析器：</strong><br>将词法分析器分析的 Token 流组建成更加结构化的语法树，也就是将一个个单词组装成一句话，一个完整句子。具体一点说就是按照一定的规则逐个地解析 Token 流中的每一项，每个语法树上的节点都是 com.sun.tools.javac.tree.JCTree 的一个实例。</p><p><strong>语义分析器：</strong><br>在这课语法树上再进行一些处理以产生Java字节码。如给类添加默认的构造函数、检查变量在使用之前是否已经初始化、将一些常量进行合并处理、检查操作变量类型是否匹配、检查所有操作语法是否可达、检查异常是否捕获或掷出等。最后得到完善的最终的语法树。</p><p><strong>代码生成器：</strong><br>遍历最终语法树生成 Java 字节码，这步通过 com.sun.tools.javac.jvm.Gen 这个类来完成。生成字节码需要进过两步：首先将 Java 方法中的代码块转成符合 JVM 语法树的命令形式，JVM 的操作都是基于栈的，所有操作都必须经过出栈和进栈来完成。然后，按照 JVM 的文件组织格式将字节码输出到以 class 为扩展名的文件中。</p><h2 id="4-访问者模式"><a href="#4-访问者模式" class="headerlink" title="4 访问者模式"></a><strong>4 访问者模式</strong></h2><h3 id="4-1-设计初衷："><a href="#4-1-设计初衷：" class="headerlink" title="4.1 设计初衷："></a>4.1 设计初衷：</h3><p>将稳定的数据结构和对数据结构的操作解耦。</p><h3 id="4-2-访问者模式中包含的角色："><a href="#4-2-访问者模式中包含的角色：" class="headerlink" title="4.2 访问者模式中包含的角色："></a>4.2 访问者模式中包含的角色：</h3><p>抽象访问者（Visitor）<br>具体访问者（ConcreteVisitor）<br>抽象节点元素（Element）<br>具体节点元素（ConcreteElement）<br>结构对象（ObjectStructure）：它持有整个 抽象语法树，它提供一个接口。客户端 调用 访问者 ，通过这个接口就能访问到 节点元素。<br>客户端（Client）</p><h3 id="4-3-Javac-中访问者模式的实现"><a href="#4-3-Javac-中访问者模式的实现" class="headerlink" title="4.3 Javac 中访问者模式的实现"></a>4.3 Javac 中访问者模式的实现</h3><p><strong>（1）Javac 中哪里用到了访问者模式？</strong><br>Javac 的四个主要模块中有很多遍历抽象语法树的过程。访问抽象语法树的节点元素的过程就是一个访问者模式。</p><p><strong>（2）Javac 中使用访问者模式有什么好处？</strong><br>访问者模式可以将 抽象语法树 和 对抽象语法树的操作 解耦，从而使得增加对抽象语法树的操作，而不需要去修改 抽象语法树，也不必修改以前 对抽象语法树的操作，只要执行时再定义新的 访问者 就行了。</p><p><strong>（3）访问者是如何访问 抽象语法树的节点元素的？</strong><br>客户端 调用 访问者 ，通过结构对象提供的接口就能访问到 节点元素。</p><p><strong>（4）为什么不同的访问者访问同一套数据结构（Javac 中是抽象语法树），而访问者的行为却各自不同？</strong><br>遍历抽象语法树使用统一的 accept 接口，每个节点元素都会实现这个接口，但是不同的节点元素的 accept 实现是不同的，所以不同的访问者访问不同的节点元素就会得到不同的结果。</p><p><strong>参考书籍：</strong><br>《深入分析 JavaWeb 技术内幕》</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;strong&gt;要点：&lt;/strong&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;1、Javac 如何将 Java 的源代码转化为 class 字节码？&lt;br&gt;2、Javac 的语法树结构；&lt;br&gt;3、Javac 的详细工作流程；&lt;br&gt;4、Java 中如何实现内部类？&lt;b
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>Hello World</title>
