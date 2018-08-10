@@ -187,7 +187,7 @@ body {
   color: #333;
   width: 100%;
   height: 100%;
-  background: #a3d9fd url("../img/background.jpg") no-repeat top center;
+  background: #a3d9fd url("../img/background.jpg") repeat top center;
 }
 .layout-g {
   letter-spacing: -0.31em;
