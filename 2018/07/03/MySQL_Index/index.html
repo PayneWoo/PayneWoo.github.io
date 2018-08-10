@@ -12,7 +12,7 @@
 <p><strong>4、为字符串值得前缀编索引</strong><br>假设有一个 CHAR（300）的数据列，而且大多数值的前 10 或 20 个字符都是唯一的，那么就不用为整个数据列编制索引，而只需要为前面的 20 或者 30 个字符编制索引就行了，这样可以降低索引占据的内存空间，而且会使得查询更快。</p>
 <p><strong>5、充分利用最左边的前缀</strong><br>创建一个 n 个数据列的复合索引，实际上就创建了 n 个索引。一个复合索引在工作时，就相当于 n 个索引，因为索引中最左边的数据列集合能够用于匹配数据行，这样的一个集合就被称为“最左边的前缀”。</p>
 <p><strong>MySQL 不能使用没有包含最左边前缀的搜索的索引。</strong><br>假设有个数据表，数据表有复合索引，数据列名称是 state（州）、city（城市）、code（邮编）。索引中的数据行是以 州/城市/邮编 的顺序存储的，因此它们自动以 州/城市  的顺序，也以 州 的顺序分类。所以，索引可以用来搜索一下的数据列的组合：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">state, city, code</span><br><span class="line">state, city</span><br><span class="line">state</span><br></pre></td></tr></table></figure>
+<figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">state</span>, city, code</span><br><span class="line"><span class="keyword">state</span>, city</span><br><span class="line"><span class="keyword">state</span></span><br></pre></td></tr></table></figure>
 <p>如果使用 <code>state, code</code> ，这时，尽管 MySQL 可以使用索引来找到那些与这个州匹配的数据行从而缩小搜索范围，但是这个索引不能用于值的组合。</p>
 <p><strong>6、利用“慢查询”日志找出性能低劣的查询</strong><br><a href="https://www.cnblogs.com/kerrycode/p/5593204.html" target="_blank" rel="noopener">“慢查询”日志</a>是一个文本文件，如果在这个日志里经常出现某个查询命令，就意味着它的代码可能不够优化。所以这个日志可以帮助我们找出可能受益于使用索引的查询命令。</p>
 <p><strong>7、索引的类型要与打算进行比较操作的类型保持匹配</strong></p>
